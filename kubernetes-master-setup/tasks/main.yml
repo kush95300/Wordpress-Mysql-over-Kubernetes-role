@@ -1,0 +1,85 @@
+---
+# tasks file for kubernetes-master-setup---
+- name: "yum configure"
+  yum_repository:
+            name: "kubernetes"
+            description: "kubernetes repo"
+            baseurl: https://packages.cloud.google.com/yum/repos/kubernetes-el7-\$basearch
+            enabled: yes
+            gpgcheck: yes
+            repo_gpgcheck: yes
+            gpgkey:
+                - https://packages.cloud.google.com/yum/doc/yum-key.gpg
+                - https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+           #exclude: kubelet kubeadm kubectl
+- name: "Installing required packages "
+  package:
+            name:
+                    - docker
+                    - kubelet
+                    - kubeadm
+                    - iproute-tc
+                    - kubectl
+  
+- name: "Systemd set as Docker cgroup"
+  copy:
+            dest: /etc/docker/daemon.json
+            content: '{
+                         "exec-opts": ["native.cgroupdriver=systemd"]
+                     }'
+  notify: restart docker 
+
+- name: "Docker and Kubelet services Started"
+  service:
+            name: "{{ item }}"
+            state: started
+            enabled: yes
+  loop: 
+      - docker
+      - kubelet
+
+- name: "Bridge file enabled"
+  copy:
+            dest: /etc/sysctl.d/k8s.conf
+            src: bridge.yml
+- name: "Pulling Images"
+  shell:
+            cmd: "{{item}}"
+  loop:
+            - "sysctl --system"
+            - "kubeadm config images pull"
+- name: "Checking Kube config"
+  shell:
+            cmd: "ls -l $HOME/.kube"
+  register: x
+  ignore_errors: yes
+- name: "k8s inilization"
+  shell:
+            cmd: "{{item}}"
+  loop:
+              - "kubeadm init --pod-network-cidr={{ cidr }}/16 --ignore-preflight-errors=NumCPU --ignore-preflight-errors=Mem"
+              - "mkdir -p $HOME/.kube"
+              - "sudo cp -fi /etc/kubernetes/admin.conf $HOME/.kube/config"
+              - "sudo chown $(id -u):$(id -g) $HOME/.kube/config"
+              - "sudo chown $(id -u):$(id -g) $HOME/.kube/config"
+              #- "kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml"
+  when: x.failed
+- name: "Flannel file download"
+  template:
+       dest: /root
+       src: kube-flannel.yml
+  when: x.failed
+- name: "Flannel Setup"
+  shell: "kubectl apply -f kube-flannel.yml"
+  args:
+       chdir: "/root"
+  when: x.failed
+- name: "Creating Token"
+  shell:
+            cmd: "kubeadm token create --print-join-command > ~/token.txt"
+- name: "Copying Token"
+  fetch:
+            dest: "/token.txt"
+            src: "~/token.txt"
+            flat: yes
+

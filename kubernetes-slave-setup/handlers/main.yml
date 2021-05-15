@@ -1,0 +1,7 @@
+---
+# handlers file for kubernetes-slave-setup---
+- name: restart docker
+  service:
+            name: "docker"
+            state: restarted
+

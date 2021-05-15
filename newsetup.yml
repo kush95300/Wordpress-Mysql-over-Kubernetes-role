@@ -1,0 +1,119 @@
+---
+- hosts: localhost
+  vars_files:
+          - parameters.yml
+  tasks:
+          - name: "Clearing Inventory"
+            shell:
+                    cmd: "echo '# inventory file' | cat > inventory"
+            when: clear_inventory == "yes"
+
+- hosts: localhost
+  vars_files:
+          - parameters.yml
+          - secret.yml
+  roles:
+          - name: "Creating Master instance"
+            role: aws_instance_launcher
+            vars:
+                    i_name: master_node
+                    access_pass: "{{ access_key }}"
+                    secret_pass: "{{ secret_key }}"
+                    grp_tag: master_node
+                    tag: master
+                    inventory: "{{ inventory_path }}"
+                    counts: 1
+          - name: "Creating Slave instance"
+            role: aws_instance_launcher
+            vars:
+                    i_name: slave_node
+                    access_pass: "{{ access_key }}"
+                    secret_pass: "{{ secret_key }}"
+                    inventory: "{{ inventory_path }}"
+                    grp_tag: slave_node
+                    tag: slave
+                    counts: 1
+          - name: "Creating Slave instance"
+            role: aws_instance_launcher
+            vars:
+                    i_name: slave_node_2
+                    access_pass: "{{ access_key }}"
+                    secret_pass: "{{ secret_key }}"
+                    inventory: "{{ inventory_path }}"
+                    grp_tag: slave_node_2
+                    tag: slave
+                    counts: 1
+
+
+- hosts: master_node
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars_files:
+          - parameters.yml
+  roles:
+          - name: "Master Node Setup"
+            role: kubernetes-master-setup
+- hosts: slave_node
+  become: yes
+  become_method: sudo
+  become_user: root
+  roles:
+          - name: "Slave Node Setup"
+            role: kubernetes-slave-setup
+
+- hosts: slave_node_2
+  become: yes
+  become_method: sudo
+  become_user: root
+  roles:
+          - name: "Slave Node Setup"
+            role: kubernetes-slave-setup
+
+
+- hosts: master_node
+  vars_files:
+          - parameters.yml
+  become: yes
+  tasks:
+          - name: "Creating Mysql Pod"
+            command: "kubectl run {{ mysql_pod_name }} --image=mysql:5.7 --env=MYSQL_ROOT_PASSWORD={{  db_root_pass }} --env=MYSQL_USER={{ db_user }} --env=MYSQL_PASSWORD={{ db_pass }} --env=MYSQL_DATABASE={{ db_name }}" 
+          - name: "Wait for 30 sec for  Mysql to configured successfully"
+            wait_for:
+                  timeout: 20
+
+          - name: "Database Detail"
+            command: "kubectl -o yaml get pod {{ mysql_pod_name }}"
+            register: x
+          - name: " Displaying DB Detail"
+            debug:
+                  var: x.stdout| from_yaml
+            register: y
+          - name: "Creating Wordpress Pod"
+            command: "kubectl run {{ wp_pod_name }} --image=wordpress:5.1.1-php7.3-apache --env='WORDPRESS_DB_HOST={{ y['x.stdout| from_yaml']['status']['podIP'] }}' --env='WORDPRESS_DB_USER={{ db_user }}' --env='WORDPRESS_DB_PASSWORD={{ db_pass }}' --env='WORDPRESS_DB_NAME={{ db_name }}'"
+          - name: "Wordpress Exposed"
+            command: "kubectl expose pod  {{ wp_pod_name }} --port=80 --type=NodePort"
+          - block:
+                  - template:
+                          dest: "~/file.sh"
+                          src: "Nodeportcmd.sh"
+                  - name: "Updating Desired Nodeport"
+                    shell:
+                            cmd: "bash ~/file.sh"
+                 
+            rescue:
+                    - name: "Updating Nodeport Failed"
+                      debug:
+                              msg: "Desired Nodeport not assigned due to either 'Port not Available' Error or ant other errors."
+          - name: "Removing Cache"
+            file:
+                    path: "~/file.sh"
+                    state: absent
+          - name: "Getting Website Url"
+            shell:
+                    cmd: "kubectl get svc {{ wp_pod_name }} -o yaml | grep nodePort | cut -d ' ' -f5"
+            register: url
+          
+          - name: "Displaying Website Url"
+            debug:
+                    msg: " Website URL: http://{{ groups['master_node'][0] }}:{{ url.stdout }}"

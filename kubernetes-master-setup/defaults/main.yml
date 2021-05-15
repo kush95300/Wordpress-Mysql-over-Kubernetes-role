@@ -1,0 +1,4 @@
+---
+# defaults file for kubernetes-master-setup# Contain Parameters of K8sMaster Instance
+
+cidr: 10.240.0.0

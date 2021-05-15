@@ -1,0 +1,54 @@
+---
+# tasks file for kubernetes-slave-setup---
+- name: "yum configure"
+  yum_repository:
+            name: "kubernetes"
+            description: "kubernetes repo"
+            baseurl: https://packages.cloud.google.com/yum/repos/kubernetes-el7-\$basearch
+            enabled: yes
+            gpgcheck: yes
+            repo_gpgcheck: yes
+            gpgkey:
+                - https://packages.cloud.google.com/yum/doc/yum-key.gpg
+                - https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+           #exclude: kubelet kubeadm kubectl
+- name: "Installing required packages "
+  package:
+            name:
+                    - docker
+                    - kubelet
+                    - kubeadm
+                    - iproute-tc
+                    - kubectl
+  
+- name: "Systemd set as Docker Cgroup "
+  copy:
+            dest: /etc/docker/daemon.json
+            content: '{
+                         "exec-opts": ["native.cgroupdriver=systemd"]
+                     }'
+  notify: restart docker 
+
+- name: "Kubelet and Docker Services Started"
+  service:
+            name: "{{ item }}"
+            state: started
+            enabled: yes
+  loop: 
+      - docker
+      - kubelet
+
+- name: "Kubernetes Bridge file updated"
+  copy:
+            dest: /etc/sysctl.d/k8s.conf
+            src: bridge.yml
+- name: "Restarting Systememd"
+  shell:
+            cmd: "sysctl --system"
+- name: "Copying Token"
+  copy:
+            src: "/token.txt"
+            dest: "~/token.txt"
+- name:  "Token Applied"
+  shell:
+            cmd: "bash ~/token.txt "
