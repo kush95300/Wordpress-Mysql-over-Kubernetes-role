@@ -1,8 +1,8 @@
-# Kubernetes Multi-node Cluster Setup Role
+# Wordpress Mysql Over Kubernetes Setup Role
 
 Hi Guys
 </br>
-I have created this repository to setup kubernetes cluster over aws in a few minutes. So, use this role. This is created for educational and learning purpose. You can find roles at ansible-galaxy also.
+I have created this repository to setup wordpress-mysql setup over  kubernetes multi-node cluster cluster over aws in a few minutes. So, use this role. This is created for educational and learning purpose. You can find roles at ansible-galaxy also.
 
 # Quick Reference
 ##### Maintained by: Kaushal Soni
@@ -28,6 +28,15 @@ Following parameters are there :
 |12. |   **ssh_key_full_path**    (String) | Aws key path (Local path,)  | It denotes full key path, where key is there, so that it can write it in inventory as automatic entry..  | Update it in 'aws_instance_launcher' role defaults dir or   in setup.yml file. |
 |13. |   <b>access_pass </b>     (String) ( Required )| AWS IAM user Access Key  | It denotes aws access key. | Update it in 'aws_instance_launcher' role defaults/main.yml file or 'aws_instance_launcher' role vars/main.yml file or   in setup.yml file |
 |14. |   <b>secret_pass</b>     (String) ( Required ) | AWS IAM user Secret key  | It denotes aws secret key. | Update it in 'aws_instance_launcher' role defaults/main.yml file or 'aws_instance_launcher' role vars/main.yml file or   in setup.yml file. |
+|15. |   <b>cidr</b>     (String) ( Required ) | Kubernetes Cluster Network Range  | It denotes Network starting Ip. eg. : 10.240.0.0 | Update it in 'kubernetes-master-node-setup' role defaults/main.yml file or parameters.yml file or   in setup.yml file. |
+|16. |   <b>mysql_pod_name</b>     (String) ( Required ) | Mysql pod name  | It denotes Mysql Pod Name. | Update it in parameter.yml file or   in newsetup.yml file. |
+|17. |   <b>db_root_pass</b>     (String) ( Required ) | Mysql Root User Pass  | It denotes Mysql Database Root User Pass. | Update it in parameter.yml file or   in newsetup.yml file. |
+|18. |   <b>db_pass</b>     (String) ( Required ) | Mysql General User Pass  | It denotes Mysql General User Password. | Update it in parameter.yml file or   in newsetup.yml file. |
+|19. |   <b>db_user</b>     (String) ( Required ) | Mysql Database General User  | It denotes Mysql General User Name. | Update it in parameter.yml file or   in newsetup.yml file. |
+|20. |   <b>db_name</b>     (String) ( Required ) | Mysql Database Name  | It denotes Mysql Database Name. | Update it in parameter.yml file or   in newsetup.yml file. |
+|21. |   <b>wp_pod_name</b>     (String) ( Required ) | WordPress Pod Name  | It denotes WordPress Pod Name. | Update it in parameter.yml file or   in newsetup.yml file. |
+|22. |   <b>nodePort</b>     (String) ( Required ) | Kubernetes Service Nodeport  | It denotes Kubernetes Service NodePort. Must be in Range 30000-32500 | Update it in parameter.yml file or   in newsetup.yml file. |
+|23. |   <b>clean_inventory</b>     (String) ( Required ) | Inventory Clean Option  | It denotes whether you want to clear Inventory or not. Default value: yes. ( yes/no available). | Update it in parameter.yml file or   in newsetup.yml file. |
 
 
 
@@ -92,7 +101,12 @@ Email: kaushal95300@gmail.com
 
 Linkedin : https://www.linkedin.com/in/kaushal-soni-988650146/
 
-Github : https://github.com/kush95300 </b>
+Github : https://github.com/kush95300 
+
+Medium : https://kaushalsoni.medium.com </b> 
+
+
+
 
 
 <br>
