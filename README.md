@@ -20,7 +20,7 @@ Following parameters are there :
 | 4. |   **img**    (String) | Aws AMI ID  | It denotes AMI iD. AMI ID is the image through which instance will launch. e.g. - ami-xxxxxxxxx  | Update it in 'aws_instance_launcher' role defaults dir or   in setup.yml file. |
 | 5. |   **subnet**    (String) | Aws VPC Subnet ID  | It denotes VPC subnet ID. e.g. - subnet-xxxxxxxxx)   | Update it in 'aws_instance_launcher' role defaults dir or   in setup.yml file. |
 | 6. |  **SG**    (String) | Security Group ID  | It is the Ec2 Security Group ID. e.g. - sg-xxxxxxxxxx   | Update it in 'aws_instance_launcher' role defaults dir or   in setup.yml file. |
-| 7. |  **counts**    (Number) | counts  | Counts denotes number of instance to launch. e.g. - 2   | Update it in 'aws_instance_launcher' role defaults dir or   in setup.yml file. |
+| 7. |  **s_counts**    (Number) | counts  | Counts denotes number of kubernetes slave to launch. e.g. - 2   | Update it in 'aws_instance_launcher' role defaults dir or   in setup.yml file. |
 | 8. |   **zone**    (String) | Availability Zone or region  | It is the AZ from where resorces are used. e.g. - 'ap-south-1'   | Update it in 'aws_instance_launcher' role defaults dir or   in setup.yml file. |
 | 9. |  **inventory**    (String) | inventory file path  | it denotes inventory file path ( as it write group tag in inventory ). e.g. - "/etc/ansible/hosts"   | Update it in 'aws_instance_launcher' role defaults dir or   in setup.yml file. |
 | 10. |  **grp_tag**     (String) () Recommended change )  |  Inventory Group Tag  | It denotes inventory group tag, so that after launching instance inventory entry automatically done.  | Update it in 'aws_instance_launcher' role defaults dir or   in setup.yml file. |
