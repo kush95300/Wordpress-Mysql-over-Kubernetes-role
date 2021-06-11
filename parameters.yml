@@ -9,12 +9,12 @@
 #i_type: "t2.micro"                 # Instance type
 #img: 'ami-08e0ca9924195beba'       # AMI iD
 #subnet: 'subnet-3bb8bd53'          # Subnet ID
-#sg: 'sg-0a238838d3301e9dc'         # Security Group ID
-#counts: 1                          # Instance Count
+sg: 'sg-093d19d6b1556dc0f'         # Security Group Id
+s_counts: 2                          # slave instance Count
 #zone: 'ap-south-1'                 # Regon
 #grp_tag: "k8sSlaveaa"              # Inventory Group Tag ( This is stored in inventory as group tag. Use these tag as host for further automation work )
 
-inventory_path: "./inventory"       # Inventory path
+inventory: "./inventory"       # Inventory path
 
 #tag: "k8sSlave"                    # required Special Tag
 #ssh_key_full_path: "/home/ec2-user/newkey.pem"    # Ansible ssh private key path
@@ -36,7 +36,7 @@ cidr: 10.240.0.0
 
 # Mysql Parameters
 #
-mysql_pod_name: "mypod"
+mysql_pod_name: "mypodq"
 db_root_pass: "Root"
 db_user: "kush"
 db_pass: "any"
